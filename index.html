@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rohan Notes | A Dynamic Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f4f7fc;
+            --card-bg-color: #ffffff;
+            --primary-accent: #007bff;
+            --secondary-accent: #6f42c1;
+            --text-color-dark: #2c3e50;
+            --text-color-light: #34495e;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --header-height: 75px;
+        }
+        @keyframes calm-heartbeat {
+        0% {
+            transform: scale(1);
+            }
+        50% {
+            transform: scale(1.15);
+            }
+        100% {
+            transform: scale(1);
+        }
+        }
+
+        /* Base Styles & Animated Background */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color-dark);
+            line-height: 1.8;
+            background: linear-gradient(-45deg, #e0e7ff, #f8f9fa, #e0f7ff, #f0eaff);
+            background-size: 400% 400%;
+            animation: gradientBG 25s ease infinite;
+            cursor: none;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            width: 20px; height: 20px;
+            border: 2px solid var(--primary-accent);
+            border-radius: 50%;
+            position: fixed;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            transition: width 0.3s, height 0.3s, border-width 0.3s, background-color 0.3s, transform 0.1s linear;
+            z-index: 9999;
+        }
+        .cursor.hover-grow {
+            width: 50px; height: 50px;
+            background-color: rgba(0, 123, 255, 0.2);
+            border-width: 3px;
+        }
+        .cursor-dot {
+            width: 4px; height: 4px;
+            background-color: var(--primary-accent);
+            border-radius: 50%;
+            position: fixed;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Main Container & Sections */
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 25px; overflow: hidden; }
+        main { /* No top padding needed for hero layout */ }
+        section { padding: 100px 0; position: relative; }
+
+        /* Animated Heading with Hover Restart & Cooldown */
+        h2 {
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 70px;
+            color: var(--text-color-dark);
+            position: relative;
+        }
+        .char {
+            display: inline-block;
+            transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        h2.animated-heading .char {
+            opacity: 0;
+            transform: translateY(30px) rotate(10deg);
+        }
+        h2::after {
+            content: ''; width: 80px; height: 4px;
+            background: var(--primary-accent);
+            border-radius: 2px;
+            position: absolute;
+            bottom: -15px; left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.5s ease 0.8s;
+        }
+        h2.visible::after { opacity: 1; }
+
+        /* Header & Dynamic Navigation Underline */
+        header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 2px 10px var(--shadow-color);
+            position: fixed;
+            width: 100%; top: 0; z-index: 1000;
+            height: var(--header-height);
+            display: flex;
+            align-items: center; justify-content: space-between;
+            padding: 0 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        header h1 { font-size: 1.9rem; font-weight: 700; color: var(--primary-accent); }
+        nav { position: relative; }
+        nav ul { margin: 0; padding: 0; list-style: none; display: flex; }
+        nav ul li { margin: 0 10px; }
+        nav a {
+            text-decoration: none; color: var(--text-color-dark);
+            font-weight: 500; transition: color 0.3s ease;
+            position: relative; padding: 5px; white-space: nowrap;
+        }
+        nav a.active { color: var(--primary-accent); font-weight: 600; }
+        #nav-indicator {
+            position: absolute; height: 3px;
+            background-color: var(--primary-accent);
+            bottom: -20px;
+            border-radius: 3px;
+            transition: left 0.4s cubic-bezier(0.23, 1, 0.32, 1), width 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        /* Scroll-Reveal Base */
+        .reveal { opacity: 0; transform: translateY(60px); transition: opacity 0.8s cubic-bezier(0.5, 0, 0, 1), transform 0.8s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        
+        /* About Me Section - New Hero Design */
+        #about {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 0;
+            text-align: center;
+        }
+        .about-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+        .profile-picture-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .profile-picture-outline {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid var(--primary-accent);
+            border-radius: 50%;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease;
+        }
+        .profile-picture-container:hover .profile-picture-outline {
+            transform: scale(1.4);
+            opacity: 0;
+        }
+        .profile-picture-container:hover .profile-picture {
+            transform: scale(1.25);
+        }
+        .profile-picture {
+            width: calc(100% - 10px);
+            height: calc(100% - 10px);
+            object-fit: cover;
+            border-radius: 50%;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .about-text h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  margin: 0;
+  font-weight: 700;
+  /* Add this line for the calm heartbeat effect */
+  animation: calm-heartbeat 2.5s ease-in-out infinite;
+}
+        .about-text .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-color-light);
+            margin: 0.5rem 0 0 0;
+            max-width: 600px;
+        }
+        
+        /* Journey Timeline with Universal Tilt */
+        .timeline { position: relative; max-width: 1000px; margin: 50px auto; }
+        .timeline::before { content: ''; position: absolute; width: 3px; background-color: var(--border-color); left: 50%; margin-left: -1.5px; top: 0; bottom: 0; }
+        .timeline-container { padding: 10px 50px; position: relative; width: 50%; box-sizing: border-box; }
+        .timeline-container.left { left: 0; } .timeline-container.right { left: 50%; }
+        .timeline-node {
+            position: absolute; width: 20px; height: 20px;
+            background-color: var(--bg-color); border: 4px solid var(--border-color);
+            top: 30px; border-radius: 50%; z-index: 2;
+            transition: transform 0.4s ease, border-color 0.4s ease;
+        }
+        .timeline-container.left .timeline-node { right: -12px; } .timeline-container.right .timeline-node { left: -12px; }
+        .timeline-container.visible .timeline-node { border-color: var(--primary-accent); transform: scale(1.1); }
+        .timeline-content { padding: 25px 35px; display: flex; align-items: center; gap: 15px; }
+        .timeline-content h3 { color: var(--primary-accent); margin:0; }
+
+        /* Universal Item Card Style with 3D Tilt */
+        .item-card {
+            background: var(--card-bg-color); border-radius: 15px;
+            padding: 2.5rem; margin-bottom: 2.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 20px var(--shadow-color);
+            transform-style: preserve-3d;
+            transform: perspective(1000px);
+            transition: transform 0.1s linear, box-shadow 0.4s ease;
+        }
+        .item-card:hover { box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12); }
+        .item-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 0.5rem; }
+        .item-card h4 { color: var(--primary-accent); }
+        .item-card ul { padding-left: 20px; } .item-card li, .item-card p { color: var(--text-color-light); }
+        
+        .project-icon, .journey-icon { width: 50px; height: 50px; flex-shrink: 0; opacity: 0.7; transition: opacity 0.3s ease, transform 0.3s ease; }
+        .item-card:hover .project-icon, .item-card:hover .journey-icon { opacity: 1; transform: scale(1.1); }
+        
+        .college-awards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .college-awards-grid div { background-color: #f8f9fa; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); }
+        
+        .additional-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; }
+        .additional-grid .item-card { text-align: center; }
+        .additional-grid h3 { color: var(--secondary-accent); } .additional-grid ul { list-style: none; padding: 0; }
+        .additional-grid li { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 1rem; }
+        .skill-icon { width: 24px; height: 24px; }
+
+        /* Responsive Design */
+        @media screen and (max-width: 992px) { h2 { font-size: 2.5rem; } }
+        @media screen and (max-width: 768px) {
+            header { padding: 0 1rem; justify-content: center; }
+            header h1 { display: none; }
+            nav ul li { margin: 0 5px; } nav a { font-size: 0.9rem; padding: 5px 3px; }
+            .timeline::before { left: 20px; }
+            .timeline-container { width: 100%; padding-left: 60px; padding-right: 15px; }
+            .timeline-container.left, .timeline-container.right { left: 0%; }
+            .timeline-container.left .timeline-node, .timeline-container.right .timeline-node { left: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor"></div>
+    <div class="cursor-dot"></div>
+
+    <header>
+        <h1>Rohan Notes</h1>
+        <nav>
+            <ul>
+                <li><a href="#about" class="active hover-target">About</a></li>
+                <li><a href="#journey" class="hover-target">Journey</a></li>
+                <li><a href="#projects" class="hover-target">Projects</a></li>
+                <li><a href="#leadership" class="hover-target">Leadership</a></li>
+                <li><a href="#awards" class="hover-target">Awards</a></li>
+            </ul>
+            <div id="nav-indicator"></div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="about">
+            <div class="about-content">
+                <div class="profile-picture-container hover-target">
+                    <div class="profile-picture-outline"></div>
+                    <img src="https://www.omsods.org/uploads/images/11731512546.jpeg" alt="Rohan Pavuluri" class="profile-picture">
+                </div>
+                <div class="about-text">
+                    <h1>Rohan Pavuluri</h1>
+                    <p class="subtitle">Hi I'm Rohan, a rising senior from Austin, Texas, passionate about applying Computer Science and AI in the healthcare industry.</p>
+                </div>
+            </div>
+        </section>
+        
+        <div class="container">
+            <section id="journey"><h2 class="animated-heading">My Journey</h2><div class="timeline" id="journey-timeline"></div></section>
+            <section id="projects"><h2 class="animated-heading">Projects</h2><div id="project-list"></div></section>
+            <section id="leadership"><h2 class="animated-heading">Leadership</h2><div id="leadership-list"></div></section>
+            <section id="awards"><h2 class="animated-heading">Awards & Honors</h2><div id="awards-list"></div></section>
+            <section id="additional"><h2 class="animated-heading">Skills & Certifications</h2><div class="additional-grid" id="additional-list"></div></section>
+        </div>
+    </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- DATABASE (Same as previous version) ---
+    const db = {
+        journey: [ { year: 2025, text: "Focused on advanced AI applications in neurological diagnostics.", icon: 'https://www.svgrepo.com/show/494491/university.svg' }, { year: 2024, text: "Led international non-profit growth and achieved top USACO rankings.", icon: 'https://www.svgrepo.com/show/494441/trophy.svg' }, { year: 2023, text: "Initiated key research projects in bioinformatics and machine learning.", icon: 'https://www.svgrepo.com/show/494273/microscope.svg' }, { year: 2022, text: "Entered the world of competitive mathematics and programming.", icon: 'https://www.svgrepo.com/show/493688/atom.svg' } ],
+        projects: [ { ages: '16-18', title: 'SteadyPD', role: 'Founder & Full Stack Developer', desc: '<ul><li>Developed SteadyPD, a mobile health screening tool targeting early-stage Parkinson’s Disease (PD) detection for underserved, low-education populations.</li><li>The apps functionality extends to any socioeconomic subset.</li><li>Used smartphone sensors, like the accelerometer, microphone, and gyroscope, to extract gait features and vocal biomarkers, allowing for low-cost, non-invasive screening without medical equipment.</li><li>Used deep learning models (CNNs, LSTMs) for classification of gait stability, swing/stance ratio, and speech irregularities associated with PD progression.</li><li>Addressed disparities in neurological care by optimizing the UI/UX for individuals with low digital literacy and minimal formal education</li><li>Deployed AI enhanced predictive diagnostics for PD with alarming attention at more sever rates</li><li>Created model pipelines for real-time analysis and privacy preserving computation/storage, improving accessibility in low-resource environments.</li><li>Cross validated the data with many datasets (PhysioNet GaitND, etc.)</li><li>Researched and implemented ethical AI practices in healthcare delivery to ensure transparency and inclusivity for digitally underserved users</li></ul>', icon: "C:/Users/272ro/Downloads/SteadyPD Logo.png" }, { ages: '15-16', title: 'FSR Data for Parkinson’s Detection', role: 'Lead Research Scholar & Author', desc: '<ul><li>Conducted machine learning research on gait data for early PDParkinson’s detection using force-sensitive resistors (FSRs), under mentorship of Prof. Shadi Ghaisi (Oxford University), published in Research Archive of Recent Sciences (Preprint: “Early Prediction of Parkinson’s Disease Using FSR-Based Gait Analysis,” April 2025) </li> <li>Analyzed gait signal patterns of patients with Parkinson’s, ALS, Huntington’s disease, and healthy controls to distinguish motor impairment profiles and improve clinical screening models</li> <li>Engineered a multi-model ensemble classification pipeline that improved diagnostic accuracy from 67.89% to 81.08% by optimizing feature weights via genetic algorithms (DEAP library), outperforming baseline models</li> <li>Processed over 7,700 rows of time series data from the Gait and Neurological Disorders (GaitND) dataset (PhysioNet), extracting left/right swing stance ratios, stride intervals, and gait stability ratios</li> <li>Implemented dynamic ensemble methods (manual weighting, random search, SciPy optimization) to identify optimal predictive combinations from 13 gait-related features</li> <li>Analyzed gait signal patterns of patients with Parkinson’s, ALS, Huntington’s disease, and healthy controls to distinguish motor impairment profiles and improve clinical screening models</li></ul>', icon: 'https://www.svgrepo.com/show/452102/brain.svg' }, { ages: '15-16', title: 'AI-Driven Epilepsy Monitoring', role: 'Research Intern & Author', desc: '<ul><li>Engineered an AI-powered wearable seizure detection system integrating EEG, ECG, and electrodermal sensors.</li><li>Achieved an 83% seizure recall with a RandomForestClassifier.</li></ul>', icon: 'https://www.svgrepo.com/show/475631/pulse.svg' }, { ages: '14-15', title: 'Phototaxis Assay of Drosophila', role: 'Research Intern & Author', desc: '<ul><li>Investigated the genetic basis of learning and memory in fruit flies at UT Austin.</li><li>Performed genome-wide association studies (GWAS) to correlate behavior with genetics.</li></ul>', icon: 'https://www.svgrepo.com/show/475586/dna.svg' } ],
+        leadership: [ { ages: '15-18', title: 'Open Minds Open Doors (OMSODS)', role: 'Founder, CEO, & CTO', desc: 'Founded an international nonprofit supporting 600+ underprivileged children and distributed over 2,500 educational materials.' }, { ages: '14-15', title: 'Westlake Robotics Outreach', role: 'Outreach Lead', desc: 'Led 200+ hours of outreach, engaging over 10,000 girls in STEM.' }, { ages: '15-16', 'title': 'Westlake Warriors Cricket', 'role': 'Vice Captain', 'desc': 'Co-founded the USA High School Cricket Tournament, uniting 300+ players.' }, { ages: '14-16', title: 'Westlake HS Robotics – Steel Synergy', role: 'Design Lead', desc: 'Oversaw CAD development, earning a Top 10 state placement and 5+ design awards.' } ],
+        awards: [ { ages: '16', title: 'Global PhysicsBowl 2nd Place', desc: 'Achieved a perfect score (40/40) and captained the school team to 2nd place globally.' }, { ages: '15-18', title: 'USACO Platinum Division', desc: 'Ranked in the top 100 in the US for competitive programming.' }, { ages: '15-17', title: '2x USAMO Qualifier', desc: 'Placed in the top 200 out of ~300,000 students in the USA Mathematical Olympiad.' }, { ages: '16-17', title: 'USMDO Silver Medal', desc: 'Placed in the top 50 in the U.S. for the Medicine and Disease Olympiad.' } ],
+        collegeMathAwards: [ '1st at Stanford Math Tournament - Algebra (2024)', '5th at Stanford - Team (2024)', '6th at Carnegie Mellon - Algebra (2025)', '6th at Caltech - Team (2025)', '7th at Berkeley - Geometry (2023)', '7th at Texas A&M (2024)', '3rd at HMMT - Sweepstakes (2022)', '4th at HMMT - Sweepstakes (2023)' ],
+        additional: { certifications: { title: 'Certifications', icon: 'https://www.cadimensions.com/wp-content/uploads/2022/08/solidworks-desktop-logo.png', items: ['SolidWorks CAD', 'HarvardX Neuroscience', 'Cloud Computing (AWS)', 'Pharmacy Technician'] }, skills: { title: 'Technical Skills', icon: 'https://www.svgrepo.com/show/493722/code.svg', items: ['C++, Java, Python, C#', 'HTML, CSS, JS, R, MATLAB', 'React, MySQL, Wolfram', 'Machine Learning & AI'] }, languages: { title: 'Languages', icon: 'https://www.svgrepo.com/show/494164/language.svg', items: ['Spanish', 'Hindi', 'Chinese'] }, instruments: { title: 'Musical Instruments', icon: 'https://www.svgrepo.com/show/494488/violin.svg', items: ['Piano', 'Violin'] } }
+    };
+    
+    // --- DYNAMIC CONTENT POPULATION ---
+    function populateContent() {
+        document.getElementById('journey-timeline').innerHTML = db.journey.map((item, index) => `<div class="timeline-container reveal ${index % 2 === 0 ? 'left' : 'right'}"><div class="timeline-node"></div><div class="item-card timeline-content hover-target"><img src="${item.icon}" alt="Journey Icon" class="journey-icon"><div><h3>${item.year}</h3><p>${item.text}</p></div></div></div>`).join('');
+        document.getElementById('project-list').innerHTML = db.projects.map(item => `<div class="item-card reveal hover-target"><img src="${item.icon}" alt="Project Icon" class="project-icon"><div class="item-header"><h3>${item.title}</h3><span>Ages: ${item.ages}</span></div><h4>${item.role}</h4><div>${item.desc}</div></div>`).join('');
+        document.getElementById('leadership-list').innerHTML = db.leadership.map(item => `<div class="item-card reveal hover-target"><div class="item-header"><h3>${item.title}</h3><span>Ages: ${item.ages}</span></div><h4>${item.role}</h4><p>${item.desc}</p></div>`).join('');
+        const awardsHtml = db.awards.map(item => `<div class="item-card reveal hover-target"><div class="item-header"><h3>${item.title}</h3><span>Ages: ${item.ages}</span></div><p>${item.desc}</p></div>`).join('') + `<div class="item-card reveal hover-target"><div class="item-header"><h3>College Math Competitions</h3><span>Ages: 14-18</span></div><p>Consistently placed at the nation's most prestigious university-run math tournaments:</p><div class="college-awards-grid">${db.collegeMathAwards.map(award => `<div>${award}</div>`).join('')}</div></div>`;
+        document.getElementById('awards-list').innerHTML = awardsHtml;
+        document.getElementById('additional-list').innerHTML = Object.values(db.additional).map(cat => `<div class="item-card reveal hover-target"><h3>${cat.title}</h3><ul>${cat.items.map(i => `<li><img src="${cat.icon}" class="skill-icon" alt=""/>${i}</li>`).join('')}</ul></div>`).join('');
+    }
+    
+    populateContent();
+
+    // --- ANIMATION & INTERACTIVITY ---
+    
+    // 1. Custom Cursor
+    const cursor = document.querySelector('.cursor');
+    const cursorDot = document.querySelector('.cursor-dot');
+    window.addEventListener('mousemove', e => {
+        cursor.style.transform = `translate3d(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%), 0)`;
+        cursorDot.style.transform = `translate3d(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%), 0)`;
+    });
+    
+    // 2. Universal 3D Card Tilt & Cursor Grow
+    const hoverTargets = document.querySelectorAll('.hover-target, a');
+    hoverTargets.forEach(target => {
+        target.addEventListener('mouseenter', () => cursor.classList.add('hover-grow'));
+        target.addEventListener('mouseleave', () => cursor.classList.remove('hover-grow'));
+
+        if (target.classList.contains('item-card')) {
+            target.addEventListener('mousemove', e => {
+                const rect = target.getBoundingClientRect();
+                const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+                const { width, height } = rect;
+                const rotateX = (y / height - 0.5) * -15;
+                const rotateY = (x / width - 0.5) * 15;
+                target.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            target.addEventListener('mouseleave', () => {
+                target.style.transform = `perspective(1000px) rotateX(0) rotateY(0)`;
+            });
+        }
+    });
+
+    // 3. Scroll-Reveal
+    const revealElements = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    revealElements.forEach(el => revealObserver.observe(el));
+    
+    // 4. Animated Heading with Hover Restart & Cooldown
+    function animateHeading(heading) {
+        if (heading.dataset.isAnimating === 'true') return;
+        heading.dataset.isAnimating = 'true';
+
+        const text = heading.dataset.originalText;
+        heading.innerHTML = text.split('').map(char => `<span class="char">${char === ' ' ? '&nbsp;' : char}</span>`).join('');
+        
+        let animationDuration = 0;
+        heading.querySelectorAll('.char').forEach((char, i) => {
+            animationDuration = i * 30;
+            setTimeout(() => {
+                char.style.opacity = '1';
+                char.style.transform = 'translateY(0) rotate(0)';
+            }, animationDuration);
+        });
+        
+        setTimeout(() => {
+            heading.dataset.isAnimating = 'false';
+        }, animationDuration + 2000); // Animation duration + 2s cooldown
+    }
+    
+    document.querySelectorAll('.animated-heading').forEach(h2 => {
+        h2.dataset.originalText = h2.textContent;
+        h2.dataset.isAnimating = 'false';
+        h2.innerHTML = h2.textContent.split('').map(char => `<span class="char" style="opacity:0;">${char}</span>`).join('');
+        h2.addEventListener('mouseenter', () => animateHeading(h2));
+
+        const headingObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const heading = entry.target;
+                    if (!heading.classList.contains('visible')) {
+                        heading.classList.add('visible');
+                        animateHeading(heading);
+                    }
+                    observer.unobserve(heading);
+                }
+            });
+        }, { threshold: 0.5 });
+        headingObserver.observe(h2);
+    });
+    
+    // 5. Active Navigation Link & Dynamic Underline
+    const sections = document.querySelectorAll('main section');
+    const navLinks = document.querySelectorAll('nav a');
+    const navIndicator = document.getElementById('nav-indicator');
+
+    function updateNavIndicator(activeLink) {
+        if (!activeLink) return;
+        navIndicator.style.width = `${activeLink.offsetWidth}px`;
+        navIndicator.style.left = `${activeLink.offsetLeft}px`;
+    }
+
+    const navObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute('id');
+                const activeLink = document.querySelector(`nav a[href="#${id}"]`);
+                navLinks.forEach(link => link.classList.remove('active'));
+                activeLink?.classList.add('active');
+                updateNavIndicator(activeLink);
+            }
+        });
+    }, { rootMargin: '-40% 0px -60% 0px' });
+    sections.forEach(section => navObserver.observe(section));
+    
+    window.addEventListener('load', () => updateNavIndicator(document.querySelector('nav a.active')));
+    window.addEventListener('resize', () => updateNavIndicator(document.querySelector('nav a.active')));
+
+    // 6. Smooth Scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+});
+</script>
+
+</body>
+</html>
